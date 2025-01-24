@@ -46,6 +46,14 @@ const salaryRangesList = [
   },
 ]
 
+const locationData = [
+  {locationId: 'HYDERABAD', label: 'Hyderabad'},
+  {locationId: 'BANGALORE', label: 'Bangalore'},
+  {locationId: 'CHENNAI', label: 'Chennai'},
+  {locationId: 'DELHI', label: 'Delhi'},
+  {locationId: 'MUMBAI', label: 'Mumbai'},
+]
+
 const apiStatusConstants = {
   initial: 'INITIAL',
   success: 'SUCCESS',
@@ -60,6 +68,7 @@ class Jobs extends Component {
     employeeTypeList: [],
     minimumSalary: '',
     searchInput: '',
+    location: [],
   }
 
   componentDidMount() {
@@ -70,11 +79,11 @@ class Jobs extends Component {
     this.setState({
       apiStatus: apiStatusConstants.inProgress,
     })
-    const {employeeTypeList, minimumSalary, searchInput} = this.state
+    const {employeeTypeList, minimumSalary, searchInput, location} = this.state
     // console.log(employeeTypeList)
     // employeeTypeList is empty array on initial page load when any input of type of employment is clicked
     // we are setting state of this type in changeEmployeeList function
-    const apiUrl = `https://apis.ccbp.in/jobs?employment_type=${employeeTypeList.join()}&minimum_package=${minimumSalary}&search=${searchInput}`
+    const apiUrl = `https://apis.ccbp.in/jobs?employment_type=${employeeTypeList.join()}&minimum_package=${minimumSalary}&locaton=${location.join()}&search=${searchInput}`
     // To convert a list of items as a comma-separated string we can use the array method join()
     //  const fruits = ["Banana", "Orange", "Apple", "Mango"];
     // console.log(fruits.join()) Banana,Orange,Apple,Mango
@@ -211,6 +220,26 @@ class Jobs extends Component {
     }
   }
 
+  changeLocation = type => {
+    const {location} = this.state
+
+    const inputNotInList = location.filter(eachItem => eachItem === type)
+    // console.log(inputNotInList)
+    if (inputNotInList.length === 0) {
+      this.setState(
+        prevState => ({
+          location: [...prevState.location, type],
+        }),
+        this.getJobs,
+      )
+    } else {
+      const filteredData = location.filter(eachItem => eachItem !== type)
+      // console.log(filteredData)
+
+      this.setState({location: filteredData}, this.getJobs)
+    }
+  }
+
   changeSearchInput = event => {
     this.setState({searchInput: event.target.value})
   }
@@ -236,6 +265,8 @@ class Jobs extends Component {
               getJobs={this.getJobs}
               changeSalary={this.changeSalary}
               changeEmployeeList={this.changeEmployeeList}
+              locationList={locationData}
+              changeLocation={this.changeLocation}
             />
             <div className="search-input-jobs-list-container">
               <div className="search-input-container-desktop">
