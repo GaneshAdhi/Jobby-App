@@ -76,20 +76,12 @@ class Jobs extends Component {
   }
 
   getJobs = async () => {
-    this.setState({
-      apiStatus: apiStatusConstants.inProgress,
-    })
+    this.setState({apiStatus: apiStatusConstants.inProgress})
+
     const {employeeTypeList, minimumSalary, searchInput, location} = this.state
-    // console.log(employeeTypeList)
-    // employeeTypeList is empty array on initial page load when any input of type of employment is clicked
-    // we are setting state of this type in changeEmployeeList function
-    const apiUrl = `https://apis.ccbp.in/jobs?employment_type=${employeeTypeList.join()}&minimum_package=${minimumSalary}&locaton=${location.join()}&search=${searchInput}`
-    // To convert a list of items as a comma-separated string we can use the array method join()
-    //  const fruits = ["Banana", "Orange", "Apple", "Mango"];
-    // console.log(fruits.join()) Banana,Orange,Apple,Mango
+    const apiUrl = `https://apis.ccbp.in/jobs?employment_type=${employeeTypeList.join()}&minimum_package=${minimumSalary}&location=${location.join()}&search=${searchInput}`
 
     const jwtToken = Cookies.get('jwt_token')
-
     const options = {
       headers: {
         Authorization: `Bearer ${jwtToken}`,
@@ -97,9 +89,9 @@ class Jobs extends Component {
       method: 'GET',
     }
     const response = await fetch(apiUrl, options)
-    if (response.ok === true) {
+
+    if (response.ok) {
       const data = await response.json()
-      //  console.log(data.jobs) array of 60 objects
       const updatedJobsData = data.jobs.map(eachJob => ({
         companyLogoUrl: eachJob.company_logo_url,
         employmentType: eachJob.employment_type,
@@ -115,9 +107,7 @@ class Jobs extends Component {
         apiStatus: apiStatusConstants.success,
       })
     } else {
-      this.setState({
-        apiStatus: apiStatusConstants.failure,
-      })
+      this.setState({apiStatus: apiStatusConstants.failure})
     }
   }
 
@@ -223,19 +213,20 @@ class Jobs extends Component {
   changeLocation = type => {
     const {location} = this.state
 
+    // Check if location is already selected
     const inputNotInList = location.filter(eachItem => eachItem === type)
-    // console.log(inputNotInList)
+
     if (inputNotInList.length === 0) {
+      // Add location to state
       this.setState(
         prevState => ({
           location: [...prevState.location, type],
         }),
-        this.getJobs,
+        this.getJobs, // Fetch jobs after updating location
       )
     } else {
+      // Remove location from state
       const filteredData = location.filter(eachItem => eachItem !== type)
-      // console.log(filteredData)
-
       this.setState({location: filteredData}, this.getJobs)
     }
   }
